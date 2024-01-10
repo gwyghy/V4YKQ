@@ -1,0 +1,592 @@
+/********************************************************************************
+* 文件名：	InterfaceMenu.h
+* 作者：	马如意   
+* 版本：   	V1.0
+* 日期：    2015.09.09  
+* 功能描述: 定义InterfaceMenu.h头文件
+* 			
+*			
+* 修改说明：   
+*
+*       >>>>  在工程中的位置  <<<<
+*             3-应用层
+*         √   2-协议层
+*             1-硬件驱动层
+*********************************************************************************
+* @copy
+* <h2><center>&copy; COPYRIGHT 天津华宁电子有限公司 研发中心 软件部</center></h2>
+*********************************************************************************/
+#ifndef  __INTERFACE_MENU_H__
+#define  __INTERFACE_MENU_H__
+
+/********************************************************************************
+* .h头文件
+*********************************************************************************/
+#include "includes.h"
+
+
+/********************************************************************************
+* #define宏定义
+*********************************************************************************/
+#define 	KEY_MENU_0		KEY_25
+#define 	KEY_MENU_1		KEY_22
+#define		KEY_MENU_2		KEY_23
+#define 	KEY_MENU_3		KEY_31
+#define 	KEY_MENU_4		KEY_32
+#define 	KEY_MENU_5		KEY_35
+#define 	KEY_MENU_6		KEY_41
+#define		KEY_MENU_7		KEY_15
+#define 	KEY_MENU_8		KEY_21
+#define 	KEY_MENU_9		KEY_24
+
+
+#define		KEY_MENU_UP		KEY_34
+#define 	KEY_MENU_DOWN	KEY_33
+
+#define 	KEY_MENU_LEFT	KEY_42
+#define		KEY_MENU_RIGHT	KEY_43		
+
+#define		KEY_MENU_DEFINE	KEY_55
+
+#define		KEY_MENU_N	  KEY_13
+#define 	KEY_MENU_Q		KEY_14
+
+#if (INCREASE_DECREASE_CTRL_ENABLE_FLAG	!= DISABLED)
+	#define 	KEY_MENU_OK		KEY_52
+#else 
+	#define 	KEY_MENU_OK		KEY_52
+#endif
+
+#define	KEY_MENU_STOP		KEY_72	
+
+/*结构体声明*/
+typedef struct
+{
+	u16 u16CharCnt;		//显示的最大字符数
+	u16 u16BufInd;		//输入字符计数；但在参数整数输入时，=0表示当前输入数字代替初值；=1表示输入数字顺序填入输入的个位
+	u16 u16VarType;		//0-integer; 1-float; 2-select; 3-command
+	u16 u16Row;			//输入行号0-7
+	u16 u16Col;			//输入起始列号0-127
+	u16 u16VarMax;		//输入最大值
+	u16 u16VarMin;		//输入最小值
+	u16 u16GlobalPar;	//参数类别。1-整体；2-本地；3-本地&整体
+	u16 u16MenuGrpNo;	//输入最小值
+	u16 u16MenuItemNo;	//参数类别。1-整体；2-本地；3-本地&整体
+	const u8 *pSelItem;	//选择项表
+	u16 u16InputVal;	//显示值
+	u16 u16Offset;		//在参数表中偏移地
+}stEDIT_PAR;
+
+/********************************************************************************
+* 常量定义
+*********************************************************************************/
+//菜单组序号
+enum
+{
+	MENU_YKQ_MACHINE_NO	=	0,			//本机参数
+
+	#if (QUICK_KEY_CTRL_ENABLE_FLAG	!= DISABLED)
+		#if (QUICK_KEY_1_ENABLE_FLAG != DISABLED)
+			MENU_SHORTCUT_F1,					//快捷键1
+		#endif
+	
+		#if (QUICK_KEY_2_ENABLE_FLAG != DISABLED)
+			MENU_SHORTCUT_F2,					//快捷键2
+		#endif
+
+		#if (QUICK_KEY_3_ENABLE_FLAG != DISABLED)
+			MENU_SHORTCUT_F3,					//快捷键2
+		#endif
+	
+		#if (QUICK_KEY_4_ENABLE_FLAG != DISABLED)
+			MENU_SHORTCUT_F4,					//快捷键2
+		#endif	
+	#endif
+
+	#if (ZIBAO_CTRL_ENABLE_FLAG	!= DISABLED)
+		MENU_ZIBAO_PARAM_SET,					//自保参数
+	#endif
+	
+	MENU_DEFAULT_GRP_NO	,				//缺省参数
+
+	#if (SET_YKQ_PRGPT_USE_FLAG != 0)
+		MENU_OTHER_YKQ_PARAM_NO,	
+	#endif
+	
+//	MENU_KEY_FILM_SELECT,		//选择键盘膜	2020.01.15 parry
+	
+//	MENU_KEY_ACTION_SELECT,	//设定按键动作	2020.01.15 parry
+	
+	MENU_ID_MAX
+};
+
+//菜单项分类号
+enum
+{
+	PAR_EDIT_INT 	=	0,		//输入整数
+	PAR_EDIT_FLOAT	=	1,		//输入浮点数
+	PAR_EDIT_SEL 	=	2,		//选择项输入
+	PAR_EDIT_NOTE	=	3,		//显示项，无操作
+	PAR_EDIT_CMD	=	4,		//命令菜单项
+	PAR_EDIT_TIME	=	5		//输入日期时间
+};
+
+//参数类型分类
+enum
+{
+	PAR_GLOBAL	=			1,		//整体参数
+	PAR_LOCAL	=			2,		//本地参数
+	PAR_GLOBAL_LOCAL =		3		//整体&本地参数
+};
+
+//参数值转化为字符串，用于：
+enum
+{
+	PAR_TO_STR_FOR_SHOW	 =	0,		//菜单项显示
+	PAR_TO_STR_FOR_EDIT	 =	1		//编辑修改输入
+};
+
+//输入整数用于：
+enum
+{
+ 	INPUT_INT_FOR_PWD =	1,			//密码输入
+	 INPUT_INT_FOR_EDIT =	0,			//参数输入
+};
+
+//菜单显示
+enum
+{
+	MENU_SHOW_NOT_INIT	=	0,			//显示菜单，但不初始化菜单组
+	MENU_SHOW_AND_INIT	=	1			//显示菜单，同时初始化菜单组
+};
+
+//运行状态定义
+enum
+{
+	INTERFACEMENU_STATE_NONE = 0x00,
+	INTERFACEMENU_STATE_MENU_START,	
+	INTERFACEMENU_STATE_EDIT_ININT,			
+	INTERFACEMENU_STATE_EDIT_PWR,//输入密码	
+	INTERFACEMENU_STATE_EDIT_PWR_OK,//输入密码		
+	INTERFACEMENU_STATE_EDIT,
+	INTERFACEMENU_STATE_EDIT_SEL_GLOBAL,
+	INTERFACEMENU_STATE_EDIT_SEL_OK,
+	INTERFACEMENU_STATE_MAX
+};
+
+
+//"遥控器参数";
+enum 
+{
+	MENU_YKQ_YKQ_ID = 0x00,				//"遥控器编号",
+	MENU_YKQ_SCR_BRIGHTNESS,			//"屏显亮度",
+	MENU_YKQ_SCR_PROTECTED_BRIGHTNESS,	//"休屏亮度",	
+	MENU_YKQ_SCR_PROTECTED_MUL,			//"休屏间隔",
+	MENU_YKQ_SCR_AUTO_SHUTDOWN_TIMER,//"自动关机定时"
+	MENU_YKQ_BATTERY_VOLTAGE_1,
+	MENU_YKQ_BATTERY_VOLTAGE_2,
+};
+
+/**快捷键参数枚举**/
+#if (QUICK_KEY_CTRL_ENABLE_FLAG	!= DISABLED)
+	enum
+	{
+		MENU_QUICK_ENABLE = 0x00,
+		
+		#if (QUICK_CTRL_SUPPORT_ACTION_MAX >= 1)
+			MENU_QUICK_ACTION_1,
+			MENU_QUICK_ACTION_1_START,
+			MENU_QUICK_ACTION_1_ING,
+		#endif
+		
+		#if (QUICK_CTRL_SUPPORT_ACTION_MAX >= 2)
+			MENU_QUICK_ACTION_2,
+			MENU_QUICK_ACTION_2_START,
+			MENU_QUICK_ACTION_2_ING,
+		#endif
+		
+		#if (QUICK_CTRL_SUPPORT_ACTION_MAX >= 3)
+			MENU_QUICK_ACTION_3,
+			MENU_QUICK_ACTION_3_START,
+			MENU_QUICK_ACTION_3_ING,
+		#endif
+		
+		#if (QUICK_CTRL_SUPPORT_ACTION_MAX >= 4)
+			MENU_QUICK_ACTION_4,
+			MENU_QUICK_ACTION_4_START,
+			MENU_QUICK_ACTION_4_ING,
+		#endif
+		
+		#if (QUICK_CTRL_SUPPORT_ACTION_MAX >= 5)
+			MENU_QUICK_ACTION_5,
+			MENU_QUICK_ACTION_5_START,
+			MENU_QUICK_ACTION_5_ING,	
+		#endif
+		
+		#if (QUICK_CTRL_SUPPORT_ACTION_MAX >= 6)
+			MENU_QUICK_ACTION_6,
+			MENU_QUICK_ACTION_6_START,
+			MENU_QUICK_ACTION_6_ING,	
+		#endif
+		
+		#if (QUICK_CTRL_SUPPORT_ACTION_MAX >= 7)
+			MENU_QUICK_ACTION_7,
+			MENU_QUICK_ACTION_7_START,
+			MENU_QUICK_ACTION_7_ING,
+		#endif
+		
+		#if (QUICK_CTRL_SUPPORT_ACTION_MAX >= 8)
+			MENU_QUICK_ACTION_8,
+			MENU_QUICK_ACTION_8_START,
+			MENU_QUICK_ACTION_8_ING,
+		#endif
+		
+		#if (QUICK_CTRL_SUPPORT_ACTION_MAX >= 9)
+			MENU_QUICK_ACTION_9,
+			MENU_QUICK_ACTION_9_START,
+			MENU_QUICK_ACTION_9_ING,
+		#endif
+		
+		#if (QUICK_CTRL_SUPPORT_ACTION_MAX >= 10)
+			MENU_QUICK_ACTION_10,
+			MENU_QUICK_ACTION_10_START,
+			MENU_QUICK_ACTION_10_ING,
+		#endif
+	};
+#endif
+
+//"自保参数";
+#if (ZIBAO_CTRL_ENABLE_FLAG	!= DISABLED)
+ 	enum
+	{
+		MENU_ZIBAO_ENABLE = 0x00,//自保是否使能
+		MENU_ZIBAO_ACTION_MAX,//所支持的自保功能的最大动作数		
+
+		#if (ZIBAO_CTRL_METHOD_TYPE	== ZIBAO_PARAM_CTRL_METHOD)
+			MENU_ZIBAO_TIMEOUT,//自保超时时间设置
+			#if (SHENG_ZHU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHENGZHU_ENABLE_FLAG,
+				MENU_ZIBAO_SHENGZHU_DOING_TIME,
+			#endif		
+			#if (JIANG_ZHU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_JIANGZHU_ENABLE_FLAG,
+				MENU_ZIBAO_JIANGZHU_DOING_TIME,
+			#endif
+			#if (TUILIU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_TUILIU_ENABLE_FLAG,
+				MENU_ZIBAO_TUILIU_DOING_TIME,
+			#endif		
+			#if (YIJIA_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_YIJIA_ENABLE_FLAG,
+				MENU_ZIBAO_YIJIA_DOING_TIME,
+			#endif
+			#if (LAJIA_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_LAJIA_ENABLE_FLAG,
+				MENU_ZIBAO_LAJIA_DOING_TIME,
+			#endif
+			#if (SHENG_QIANZHU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHENGQIANZHU_FLAG,
+				MENU_ZIBAO_SHENGQIANZHU_DOING_TIME,
+			#endif
+			#if (JIANG_QIANZHU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_JIANGQIANZHU_ENABLE_FLAG,
+				MENU_ZIBAO_JIANGQIANZHU_DOING_TIME,
+			#endif
+			#if (SHENG_QIANHOUZHU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHENGQIANHOUZHU_ENABLE_FLAG,
+				MENU_ZIBAO_SHENGQIANHOUZHU_DOING_TIME,
+			#endif			
+			#if (JIANG_QIANHOUZHU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_JIANGQIANHOUZHU_ENABLE_FLAG,
+				MENU_ZIBAO_JIANGQIANHOUZHU_DOING_TIME,
+			#endif
+
+
+			#if (SHEN_SHENSUOLIANG_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHENSHENSUOLIANG_ENABLE_FLAG,
+				MENU_ZIBAO_SHENSHENSUOLIANG_DOING_TIME,
+			#endif
+			#if (SHOU_SHENSUOLIANG_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHOUSHENSUOLIANG_ENABLE_FLAG,
+				MENU_ZIBAO_SHOUSHENSUOLIANG_DOING_TIME,
+			#endif
+			#if (SHEN_PINGHENG_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHENPINGHENG_ENABLE_FLAG,
+				MENU_ZIBAO_SHENPINGHENG_DOING_TIME,
+			#endif
+			#if (SHOU_PINGHENG_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHOUPINGHENG_ENABLE_FLAG,
+				MENU_ZIBAO_SHOUPINGHENG_DOING_TIME,
+			#endif
+			#if (SHEN_QIANCHABAN_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHENQIANCHABAN_ENABLE_FLAG,
+				MENU_ZIBAO_SHENQIANCHABAN_DOING_TIME,
+			#endif
+			#if (SHOU_QIANCHABAN_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHOUQIANCHABAN_ENABLE_FLAG,
+				MENU_ZIBAO_SHOUQIANCHABAN_DOING_TIME,
+			#endif			
+
+
+			#if (SHEN_HUBANG_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHENHUBANG_ENABLE_FLAG,
+				MENU_ZIBAO_SHENHUBANG_DOING_TIME,
+			#endif
+			#if (SHOU_HUBANG_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHOUHUBANG_ENABLE_FLAG,
+				MENU_ZIBAO_SHOUHUBANG_DOING_TIME,
+			#endif
+			#if (SHEN_QIANHUBANG_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHENQIANHUBANG_ENABLE_FLAG,
+				MENU_ZIBAO_SHENQIANHUBANG_DOING_TIME,
+			#endif
+			#if (SHOU_QIANHUBANG_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHOUQIANHUBANG_ENABLE_FLAG,
+				MENU_ZIBAO_SHOUQIANHUBANG_DOING_TIME,
+			#endif
+			#if (SHEN_CEHU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHENCEHU_ENABLE_FLAG,
+				MENU_ZIBAO_SHENCEHU_DOING_TIME,
+			#endif
+			#if (SHOU_CEHU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHOUCEHU_ENABLE_FLAG,
+				MENU_ZIBAO_SHOUCEHU_DOING_TIME,
+			#endif
+			#if (SHEN_CETUI_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHENCETUI_ENABLE_FLAG,
+				MENU_ZIBAO_SHENCETUI_DOING_TIME,
+			#endif
+			#if (SHOU_CETUI_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHOUCETUI_ENABLE_FLAG,
+				MENU_ZIBAO_SHOUCETUI_DOING_TIME,
+			#endif
+
+
+			#if (TAI_DIZUO_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_TAIDIZUO_ENABLE_FLAG,
+				MENU_ZIBAO_TAIDIZUO_DOING_TIME,
+			#endif
+			#if (JIANG_DIZUO_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_JIANGDIZUO_ENABLE_FLAG,
+				MENU_ZIBAO_JIANGDIZUO_DOING_TIME,
+			#endif
+			#if (SHEN_HUBANG2_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHENHUBANG2_ENABLE_FLAG,
+				MENU_ZIBAO_SHENHUBANG2_DOING_TIME,
+			#endif
+			#if (SHOU_HUBANG2_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHOUHUBANG2_ENABLE_FLAG,
+				MENU_ZIBAO_SHOUHUBANG2_DOING_TIME,
+			#endif
+			
+
+			#if (WEILIANG_SHANGBAI_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_WEILIANGSHANGBAI_ENABLE_FLAG,
+				MENU_ZIBAO_WEILIANGSHANGBAI_DOING_TIME,
+			#endif
+			#if (WEILIANG_XIABAI_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_WEILIANGXIABAI_ENABLE_FLAG,
+				MENU_ZIBAO_WEILIANGXIABAI_DOING_TIME,
+			#endif
+			#if (SHEN_CHABAN_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHENCHABAN_ENABLE_FLAG,
+				MENU_ZIBAO_SHENCHABAN_DOING_TIME,
+			#endif
+			#if (SHOU_CHABAN_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHOUCHABAN_ENABLE_FLAG,
+				MENU_ZIBAO_SHOUCHABAN_DOING_TIME,
+			#endif	
+
+
+			#if (SHENG_HOUZHU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHENGHOUZHU_ENABLE_FLAG,
+				MENU_ZIBAO_SHENGHOUZHU_DOING_TIME,
+			#endif	
+			#if (JIANG_HOUZHU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_JIANGHOUZHU_ENABLE_FLAG,
+				MENU_ZIBAO_JIANGHOUZHU_DOING_TIME,
+			#endif	
+			#if (DINGLIANG_PENWU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_DINGLIANGPENWU_ENABLE_FLAG,
+				MENU_ZIBAO_DINGLIANGPENWU_DOING_TIME,
+			#endif	
+			#if (JIDAO_PENWU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_JIDAOPENWU_ENABLE_FLAG,
+				MENU_ZIBAO_JIDAOPENWU_DOING_TIME,
+			#endif	
+			#if (PENWU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_PENWU_ENABLE_FLAG,
+				MENU_ZIBAO_PENWU_DOING_TIME,
+			#endif				
+
+
+			#if (FANGMEI_PENWU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_FANGMEIPENWU_ENABLE_FLAG,
+				MENU_ZIBAO_FANGMEIPENWU_DOING_TIME,
+			#endif	
+			#if (LA_HOULIU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_LAHOULIU_ENABLE_FLAG,
+				MENU_ZIBAO_LAHOULIU_DOING_TIME,
+			#endif	
+			#if (SHEN_DITIAO_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHENDITIAO_ENABLE_FLAG,
+				MENU_ZIBAO_SHENDITIAO_DOING_TIME,
+			#endif	
+			#if (SHOU_DITIAO_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SHOUDITIAO_ENABLE_FLAG,
+				MENU_ZIBAO_SHOUDITIAO_DOING_TIME,
+			#endif				
+			#if (SONG_HOULIU_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_SONGHOULIU_ENABLE_FLAG,
+				MENU_ZIBAO_SONGHOULIU_DOING_TIME,
+			#endif	
+
+
+			#if (QIANLIANG_SHANGBAI_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_QIANLIANGSHANGBAI_ENABLE_FLAG,
+				MENU_ZIBAO_QIANLIANGSHANGBAI_DOING_TIME,
+			#endif
+			#if (QIANLIANG_XIABAI_ACT_ENABLED_FLAG	!= DISABLED) 
+				MENU_ZIBAO_QIANLIANGXIABAI_ENABLE_FLAG,
+				MENU_ZIBAO_QIANLIANGXIABAI_DOING_TIME,
+			#endif				
+		#endif
+	};
+#endif
+
+//"缺省参数";
+enum 
+{
+	#if (SET_YKQ_PRGPT_USE_FLAG != DISABLED)
+		MENU_DEFAULT_STATION = 0x00,				//"应用场合
+		MENU_DEFAULT_VERSION = 0x01,				//"版本"
+	#else
+	    MENU_DEFAULT_STATION = 0x00,				//"应用场合    //qinxi
+		MENU_DEFAULT_VERSION = 0x01,				//"版本"
+		MENU_WL_VERSION,                      //无线版本   jhy
+	#endif
+	#if (ONLINE_UPDATE_SELF_PRG_PT_FLAG != DISABLED)
+		MENU_DEFAULT_UPDATE_PRG,					//"更新遥控器程序"
+		MENU_CHENGUXABNG_UPDATE_PRG,	        //程序棒更新
+		MENU_WL_UPDATE_PRG,
+		MENU_CHENGUXABNG_WL_UPDATE_PRG,	        //程序棒更新
+	#endif
+	MENU_DEFAULT_REETORE_PARAM,
+	#if IR_SEND >0
+	MENU_IR_SEND_TEST,						//红外发射测试
+	#endif
+	MENU_FASTCOLIBARATE_ENABLE,				//快速对码
+    MENU_WL_SEND_TEST,                      //无线测试
+};
+
+//"微型遥控器参数";
+enum 
+{
+	MENU_OTHER_YKQ_ID = 0x00,			//"遥控器编号",
+	MENU_OTHER_YKQ_STATION,				//应用场合
+	MENU_OTHER_YKQ_VERSION,				//"版本"
+};
+
+//"键盘参数";
+enum
+{
+	MENU_KEYFILM_SELECT = 0x00,			//选择键盘膜	2020.01.15 parry
+//	MENU_FASTCOLIBARATE_ENABLE,
+};
+
+////"设定按键对应的动作";
+//enum		
+//{
+//	MENU_ACTIONSET_KEYN_1 = 0x00,  	//KEY_NUMBER_N第一功能		设定按键动作	2020.01.15 parry
+//	MENU_ACTIONSET_KEYQ_1,					//KEY_NUMBER_Q第一功能
+//	MENU_ACTIONSET_KEY1_1,					//KEY_NUMBER_1第一功能
+//	MENU_ACTIONSET_KEY2_1,					//KEY_NUMBER_2第一功能
+//	MENU_ACTIONSET_KEY3_1,					//KEY_NUMBER_3第一功能
+//	MENU_ACTIONSET_KEY4_1,					//KEY_NUMBER_4第一功能
+
+//	MENU_ACTIONSET_KEY5_1,  				//KEY_NUMBER_5第一功能
+//	MENU_ACTIONSET_KEY6_1,					//KEY_NUMBER_6第一功能
+//	MENU_ACTIONSET_KEY7_1,					//KEY_NUMBER_7第一功能
+//	MENU_ACTIONSET_KEY8_1,					//KEY_NUMBER_8第一功能
+//	MENU_ACTIONSET_KEY9_1,					//KEY_NUMBER_9第一功能
+//	MENU_ACTIONSET_KEY0_1,					//KEY_NUMBER_0第一功能
+
+//	MENU_ACTIONSET_KEYN_2,  				//KEY_NUMBER_N第二功能
+//	MENU_ACTIONSET_KEYQ_2,					//KEY_NUMBER_Q第二功能
+//	MENU_ACTIONSET_KEY1_2,					//KEY_NUMBER_1第二功能
+//	MENU_ACTIONSET_KEY2_2,					//KEY_NUMBER_2第二功能
+//	MENU_ACTIONSET_KEY3_2,					//KEY_NUMBER_3第二功能
+//	MENU_ACTIONSET_KEY4_2,					//KEY_NUMBER_4第二功能
+
+//	MENU_ACTIONSET_KEY5_2,  				//KEY_NUMBER_5第二功能
+//	MENU_ACTIONSET_KEY6_2,					//KEY_NUMBER_6第二功能
+//	MENU_ACTIONSET_KEY7_2,					//KEY_NUMBER_7第二功能
+//	MENU_ACTIONSET_KEY8_2,					//KEY_NUMBER_8第二功能
+//	MENU_ACTIONSET_KEY9_2,					//KEY_NUMBER_9第二功能
+//	MENU_ACTIONSET_KEY0_2,					//KEY_NUMBER_0第二功能
+//	
+//	
+////	MENU_ACTIONSET_KEYL_1,					//KEY_NUMBER_7第二功能
+////	MENU_ACTIONSET_KEYR_1,					//KEY_NUMBER_8第二功能
+////	MENU_ACTIONSET_KEYL_2,					//KEY_NUMBER_9第二功能
+////	MENU_ACTIONSET_KEYR_2,					//KEY_NUMBER_0第二功能
+//	
+//	
+//};
+
+/********************************************************************************
+* 变量定义
+*********************************************************************************/
+static u32 u32MenuGroupIDs[MENU_ID_MAX] = //存放菜单组号
+{	
+	MENU_YKQ_MACHINE_NO,
+	
+	#if (QUICK_KEY_CTRL_ENABLE_FLAG	!= DISABLED)
+		#if (QUICK_KEY_1_ENABLE_FLAG != DISABLED)
+			MENU_SHORTCUT_F1,			//快捷键1
+		#endif
+	
+		#if (QUICK_KEY_2_ENABLE_FLAG != DISABLED)
+			MENU_SHORTCUT_F2,			//快捷键2
+		#endif	
+
+		#if (QUICK_KEY_3_ENABLE_FLAG != DISABLED)
+			MENU_SHORTCUT_F3,			//快捷键3
+		#endif	
+	
+		#if (QUICK_KEY_4_ENABLE_FLAG != DISABLED)
+			MENU_SHORTCUT_F4,			//快捷键4
+		#endif	
+	#endif	
+	
+	#if (ZIBAO_CTRL_ENABLE_FLAG	!= DISABLED)
+		MENU_ZIBAO_PARAM_SET,					//自保参数
+	#endif
+	
+	MENU_DEFAULT_GRP_NO,		//缺省参数
+	
+	#if (SET_YKQ_PRGPT_USE_FLAG != DISABLED)
+		MENU_OTHER_YKQ_PARAM_NO,
+	#else	
+	
+	#endif
+	
+//	MENU_KEY_FILM_SELECT,		//选择键盘膜	2020.01.15 parry
+	
+//	MENU_KEY_ACTION_SELECT	//设定按键动作	2020.01.15 parry
+};
+
+/********************************************************************************
+* 声明全局参数
+*********************************************************************************/
+
+/********************************************************************************
+* 函数声明
+*********************************************************************************/
+#if (SET_YKQ_PRGPT_USE_FLAG != DISABLED)
+	u32 ParEditSetSearchDevFlagProc(u32 u32Flag);
+#endif
+u32 ParEdit(stKEY stNewKey,u32 *pIntfState);
+#endif
+
+
